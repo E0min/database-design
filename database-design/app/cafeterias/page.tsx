@@ -6,19 +6,13 @@ export default async function CafeteriasPage() {
 
     const { data: cafeterias } = await supabase
         .from('cafeterias')
-        .select('*')
+        .select('*, menus (*)')
         .order('name')
-
-    const { data: menus } = await supabase
-        .from('menus')
-        .select('*')
-        .order('menu_name')
 
     return (
         <main className="min-h-screen bg-gray-50">
             <CafeteriaMenu
                 cafeterias={cafeterias || []}
-                menus={menus || []}
             />
         </main>
     )

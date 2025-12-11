@@ -95,6 +95,7 @@ model Menu {
   cafeteria    Cafeteria     @relation(fields: [cafeteria_id], references: [cafeteria_id])
   order_details OrderDetail[]
 
+  @@unique([cafeteria_id, menu_name])
   @@map("menus")
 }
 

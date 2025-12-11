@@ -26,14 +26,14 @@ type Cafeteria = {
     location: string
     operating_hours: string
     status: string
+    menus: Menu[]
 }
 
 type Props = {
     cafeterias: Cafeteria[]
-    menus: Menu[]
 }
 
-export default function CafeteriaMenu({ cafeterias, menus }: Props) {
+export default function CafeteriaMenu({ cafeterias }: Props) {
     const [selectedCafeteriaId, setSelectedCafeteriaId] = useState<number>(
         cafeterias[0]?.cafeteria_id || 0
     )
@@ -55,7 +55,13 @@ export default function CafeteriaMenu({ cafeterias, menus }: Props) {
     }, [supabase])
 
     const selectedCafeteria = cafeterias.find(c => c.cafeteria_id === selectedCafeteriaId)
-    const currentMenus = menus.filter(m => m.cafeteria_id === selectedCafeteriaId)
+    
+    // De-duplicate menus based on menu_name to solve frontend display issue
+    const uniqueMenus = new Map<string, Menu>()
+    ;(selectedCafeteria?.menus || []).forEach(menu => {
+        uniqueMenus.set(menu.menu_name, menu)
+    })
+    const currentMenus = Array.from(uniqueMenus.values())
 
     // Group items by cafeteria for the cart view
     const groupedCartItems = items.reduce((acc, item) => {
@@ -197,10 +203,17 @@ export default function CafeteriaMenu({ cafeterias, menus }: Props) {
                             className="glass rounded-2xl p-4 flex gap-4 transition-transform active:scale-[0.98]"
                         >
                             <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200">
-                                {/* Image placeholder */}
-                                <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs font-medium">
-                                    {t.noImage}
-                                </div>
+                                {menu.image_url ? (
+                                    <img
+                                        src={menu.image_url}
+                                        alt={menu.menu_name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs font-medium">
+                                        {t.noImage}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex-1 flex flex-col justify-between py-1">
